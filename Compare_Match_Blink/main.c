@@ -12,16 +12,8 @@ volatile uint16_t tx_shift_reg = 0;
 volatile int Dac = 0;
 volatile int Cycle = 0;
 
-void analogWrite10 (int value) {
-	  cli(); Dac = value; sei();
-}
-
 ISR (TIMER1_OVF_vect) {
-  static int remain;
-  if (Cycle == 0) remain = Dac;
-  if (remain >= 256) { OCR1A = 255; remain = remain - 256; }
-  else { OCR1A = remain; remain = 0; }
-  Cycle = (Cycle + 1) & 0x03;
+  OCR1A = Dac; // value compared against counter (TNCT1) used to control duty cycle 
 }
 
 ISR(TIMER0_COMPA_vect )
@@ -71,7 +63,7 @@ void UART_tx_str(char* string){
 }
 
 void initADC(){
-ADMUX =
+  ADMUX =
             (1 << ADLAR) |     // left shift result
             (0 << REFS1) |     // Sets ref. voltage to VCC, bit 1
             (0 << REFS0) |     // Sets ref. voltage to VCC, bit 0
@@ -83,7 +75,7 @@ ADMUX =
   ADCSRA = 
             (1 << ADEN)  |     // Enable ADC 
             (1 << ADPS2) |     // set prescaler to 64, bit 2 
-            (1 << ADPS1) |     // set prescaler to 64, bit 1 
+            (0 << ADPS1) |     // set prescaler to 64, bit 1 
             (0 << ADPS0);      // set prescaler to 64, bit 0  
 
 
@@ -148,13 +140,13 @@ int main(void)
 		//UART_tx_str("ABCDE");
 		//_delay_ms(50);
 		UART_tx(ADCH);
-		//_delay_ms(50);
+		_delay_ms(10);
 	
 		// ADC value to PWM output PB1	
 		//OCR1A = ADCH;
 
 		// write ADC
-		analogWrite10(ADCH);
+		Dac = ADCH; 
 	}
 
 }
