@@ -19,5 +19,8 @@ flash:
 fuses: 	
 	avrdude -p ${MCU} -c stk500v1 -U lfuse:w:0xE2:m -P /dev/ttyACM0 -b19200
 
+testing:
+	gcc -Wall test.c -o test
+
 clean:
 	rm -f *.bin *.hex
